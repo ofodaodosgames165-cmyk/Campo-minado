@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Campo Minado</title>
+<style>
+  body {
+    background: #222;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(10, 40px);
+    gap: 4px;
+  }
+
+  .cell {
+    width: 40px;
+    height: 40px;
+    background: #888;
+    font-weight: bold;
+    font-size: 18px;
+    color: black;
+    border: none;
+    cursor: pointer;
+  }
+
+  .revealed {
+    background: #ccc;
+    cursor: default;
+  }
+
+  .mine {
+    background: black;
+    color: red;
+  }
+</style>
+</head>
+<body>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const rows = 10;
+const cols = 10;
+const minesCount = 15;
+const grid = document.getElementById("grid");
+let cells = [];
+let mines = [];
+
+function getColor(n) {
+  if (n === 1) return "green";
+  if (n === 2) return "darkgreen";
+  if (n === 3) return "yellow";
+  if (n === 4) return "orange";
+  if (n === 5) return "red";
+  if (n === 6) return "purple";
+  if (n >= 7) return "blue";
+}
+
+function createGrid() {
+  for (let i = 0; i < rows * cols; i++) {
+    const btn = document.createElement("button");
+    btn.className = "cell";
+    btn.onclick = () => reveal(i);
+    grid.appendChild(btn);
+    cells.push(btn);
+  }
+}
+
+function placeMines() {
+  while (mines.length < minesCount) {
+    const r = Math.floor(Math.random() * cells.length);
+    if (!mines.includes(r)) mines.push(r);
+  }
+}
+
+function countMines(index) {
+  const x = index % cols;
+  const y = Math.floor(index / cols);
+  let count = 0;
+
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dy = -1; dy <= 1; dy++) {
+      const nx = x + dx;
+      const ny = y + dy;
+      const ni = ny * cols + nx;
+      if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
+        if (mines.includes(ni)) count++;
+      }
+    }
+  }
+  return count;
+}
+
+function reveal(index) {
+  const cell = cells[index];
+  if (cell.classList.contains("revealed")) return;
+
+  cell.classList.add("revealed");
+
+  if (mines.includes(index)) {
+    cell.classList.add("mine");
+    cell.textContent = "💣";
+    alert("💥 Game Over!");
+    location.reload();
+    return;
+  }
+
+  const n = countMines(index);
+  if (n > 0) {
+    cell.textContent = n;
+    cell.style.color = getColor(n);
+  }
+}
+
+createGrid();
+placeMines();
+</script>
+
+</body>
+</html>
